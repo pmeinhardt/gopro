@@ -38,7 +38,7 @@ func sniff(fn func(http.ResponseWriter, *http.Request)) (*recording, http.Handle
   return &rec, http.HandlerFunc(handler)
 }
 
-func TestSendParam(t *testing.T) {
+func TestSend(t *testing.T) {
   rec, handler := sniff(func(writer http.ResponseWriter, req *http.Request) {
     fmt.Fprintln(writer, "request received")
   })
@@ -49,30 +49,30 @@ func TestSendParam(t *testing.T) {
   addr, _ := url.Parse(srv.URL)
 
   cam := NewCamera(addr.Host, password)
-  err := cam.SendParam("MT", 1)
+  err := cam.Send("MT", 1)
 
   if err != nil {
-    t.Errorf("cam.SendParam returned an error")
+    t.Errorf("cam.Send returned an error")
   }
 
   request := rec.request
 
   if request.Method != "GET" {
-    t.Errorf("cam.SendParam used method %s, expected %s", request.Method, "GET")
+    t.Errorf("cam.Send used method %s, expected %s", request.Method, "GET")
   }
 
   if request.URL.Path != "/camera/MT" {
-    t.Errorf("cam.SendParam requested wrong path: %s", request.URL.Path)
+    t.Errorf("cam.Send requested wrong path: %s", request.URL.Path)
   }
 
   query := request.URL.Query()
 
   if query.Get("t") != password {
-    t.Errorf("cam.SendParam should send password")
+    t.Errorf("cam.Send should send password")
   }
 
   if query.Get("p") != `%01` {
-    t.Errorf("cam.SendParam should send parameter")
+    t.Errorf("cam.Send should send parameter")
   }
 }
 

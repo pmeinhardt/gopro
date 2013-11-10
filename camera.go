@@ -15,50 +15,53 @@ func NewCamera(ipaddress, password string) *Camera {
   return &Camera{ipaddress, password}
 }
 
-func (cam *Camera) queryURL(action string, param int) string {
+func (cam *Camera) queryString(param ...int) string {
+  q := url.Values{}
+
+  q.Set("t", cam.password)
+
+  if len(param) > 0 {
+    q.Set("p", `%0` + strconv.Itoa(param[0]))
+  }
+  return q.Encode()
+}
+
+func (cam *Camera) queryURL(action string, param ...int) string {
   u := url.URL{}
 
   u.Scheme = "http"
   u.Host = cam.ipaddress
   u.Path = "/camera/" + action
-
-  params := url.Values{}
-  params.Set("t", cam.password)
-  params.Set("p", `%0` + strconv.Itoa(param))
-
-  u.RawQuery = params.Encode()
+  u.RawQuery = cam.queryString(param...)
 
   return u.String()
 }
 
-// func (cam *Camera) Send(action string) error {
-// }
-
-func (cam *Camera) SendParam(action string, param int) error {
-  _, err := http.Get(cam.queryURL(action, param))
+func (cam *Camera) Send(action string, params ...int) error {
+  _, err := http.Get(cam.queryURL(action, params...))
   return err
 }
 
 func (cam *Camera) StartCapture() error {
-  return cam.SendParam("SH", 1)
+  return cam.Send("SH", 1)
 }
 
 func (cam *Camera) StopCapture() error {
-  return cam.SendParam("SH", 0)
+  return cam.Send("SH", 0)
 }
 
 func (cam *Camera) StartBeeping() error {
-  return cam.SendParam("LL", 1)
+  return cam.Send("LL", 1)
 }
 
 func (cam *Camera) StopBeeping() error {
-  return cam.SendParam("LL", 0)
+  return cam.Send("LL", 0)
 }
 
-// func (cam *Camera) DeleteLast() error {
-//   return cam.Send("DL")
-// }
+func (cam *Camera) DeleteLast() error {
+  return cam.Send("DL")
+}
 
-// func (cam *Camera) DeleteAll() error {
-//   return cam.Send("DA")
-// }
+func (cam *Camera) DeleteAll() error {
+  return cam.Send("DA")
+}
