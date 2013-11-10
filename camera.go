@@ -16,6 +16,10 @@ func NewCamera(ipaddress, password string) *Camera {
   return &Camera{ipaddress, password}
 }
 
+func DefaultCamera(password string) *Camera {
+  return NewCamera(DefaultIP, password)
+}
+
 func (cam *Camera) url(action string, params *map[string]string) string {
   u := url.URL{}
   q := url.Values{}
