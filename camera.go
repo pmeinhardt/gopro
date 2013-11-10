@@ -30,9 +30,17 @@ func (cam *Camera) url(action string, params *map[string]string) string {
     }
   }
 
-  q.Set("t", cam.password)
+  // GoPro expects parameters in a certain order,
+  // the password always has to be the first.
+  // So this won't work at the moment:
+  // q.Set("t", cam.password)
 
-  u.RawQuery = q.Encode()
+  // Instead we prepend the password "manually":
+  u.RawQuery = "t=" + cam.password
+
+  if query := q.Encode(); len(query) > 0 {
+    u.RawQuery += "&" + query
+  }
 
   return u.String()
 }

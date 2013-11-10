@@ -79,8 +79,6 @@ func TestSendParam(t *testing.T) {
     t.Errorf("cam.SendParam should send password")
   }
 
-  fmt.Println(request.URL)
-
   if query.Get("p") != string(1) {
     t.Errorf("cam.SendParam should send parameter")
   }
