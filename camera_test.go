@@ -12,11 +12,11 @@ func camcmp(t *testing.T, actual, expected *Camera) {
   }
 
   if actual.ipaddress != expected.ipaddress {
-    t.Errorf("cam.ipaddress set to %s, expected %s", actual.ipaddress, expected.ipaddress)
+    t.Errorf("cam.ipaddress set to %v, expected %v", actual.ipaddress, expected.ipaddress)
   }
 
   if actual.password != expected.password {
-    t.Errorf("cam.password set to %s, expected %s", actual.password, expected.password)
+    t.Errorf("cam.password set to %v, expected %v", actual.password, expected.password)
   }
 }
 
@@ -59,19 +59,19 @@ func TestSend(t *testing.T) {
   req := transport.request
 
   if err != nil {
-    t.Errorf("cam.Send returned an error")
+    t.Errorf("cam.Send returned an error: %v", err)
   }
 
   if req.Method != "GET" {
-    t.Errorf("cam.Send used method %s, expected %s", req.Method, "GET")
+    t.Errorf("cam.Send used method %v, expected %v", req.Method, "GET")
   }
 
   if req.URL.Host != cam.ipaddress {
-    t.Errorf("cam.Send requested host %s, expected %s", req.URL.Host, cam.ipaddress)
+    t.Errorf("cam.Send requested host %v, expected %v", req.URL.Host, cam.ipaddress)
   }
 
   if req.URL.Path != "/camera/DL" {
-    t.Errorf("cam.Send requested wrong path: %s", req.URL.Path)
+    t.Errorf("cam.Send requested wrong path: %v", req.URL.Path)
   }
 
   query := req.URL.Query()
@@ -112,19 +112,19 @@ func TestSendParam(t *testing.T) {
   req := transport.request
 
   if err != nil {
-    t.Errorf("cam.SendParam returned an error")
+    t.Errorf("cam.SendParam returned an error: %v", err)
   }
 
   if req.Method != "GET" {
-    t.Errorf("cam.SendParam used method %s, expected %s", req.Method, "GET")
+    t.Errorf("cam.SendParam used method %v, expected %v", req.Method, "GET")
   }
 
   if req.URL.Host != cam.ipaddress {
-    t.Errorf("cam.SendParam requested host %s, expected %s", req.URL.Host, cam.ipaddress)
+    t.Errorf("cam.SendParam requested host %v, expected %v", req.URL.Host, cam.ipaddress)
   }
 
   if req.URL.Path != "/camera/SH" {
-    t.Errorf("cam.SendParam requested wrong path: %s", req.URL.Path)
+    t.Errorf("cam.SendParam requested wrong path: %v", req.URL.Path)
   }
 
   query := req.URL.Query()
