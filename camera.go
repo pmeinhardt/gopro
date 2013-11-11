@@ -65,6 +65,8 @@ func (cam *Camera) SendParam(action string, param int) error {
   return err
 }
 
+// Controls
+
 func (cam *Camera) StartCapture() error {
   return cam.SendParam("SH", 1)
 }
@@ -80,6 +82,46 @@ func (cam *Camera) StartBeeping() error {
 func (cam *Camera) StopBeeping() error {
   return cam.SendParam("LL", 0)
 }
+
+// Modes
+
+func (cam *Camera) SetVideoMode() error {
+  return cam.SendParam("CM", 0)
+}
+
+func (cam *Camera) SetPhotoMode() error {
+  return cam.SendParam("CM", 1)
+}
+
+func (cam *Camera) SetBurstMode() error {
+  return cam.SendParam("CM", 2)
+}
+
+func (cam *Camera) SetTimelapseMode() error {
+  return cam.SendParam("CM", 3)
+}
+
+// Orientation
+
+func (cam *Camera) SetHeadUp() error {
+  return cam.SendParam("UP", 0)
+}
+
+func (cam *Camera) SetHeadDown() error {
+  return cam.SendParam("UP", 1)
+}
+
+// Video Resolution
+
+// Field of View (FOV)
+
+// Photo Resolution
+
+// Timer
+
+// Beep Volume
+
+// Delete
 
 func (cam *Camera) DeleteLast() error {
   return cam.Send("DL")
