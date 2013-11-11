@@ -5,13 +5,13 @@ import (
   "net/url"
 )
 
+const DefaultIP string = "10.5.5.9"
+
 type Camera struct {
   client *http.Client
   ipaddress string
   password string
 }
-
-const DefaultIP string = "10.5.5.9"
 
 func NewCamera(ipaddress, password string) *Camera {
   return &Camera{http.DefaultClient, ipaddress, password}
