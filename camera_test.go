@@ -1,54 +1,63 @@
 package gopro
 
 import (
+  // "errors"
   "net/http"
-  "net/http/httptest"
-  "net/url"
+  // "net/url"
   "testing"
 )
 
-func camcmp(t *testing.T, cam *Camera, ipaddress, password string) {
-  if cam.ipaddress != ipaddress {
-    t.Errorf("cam.ipaddress set to %s, expected %s", cam.ipaddress, ipaddress)
+func camcmp(t *testing.T, actual, expected *Camera) {
+  if actual.client != expected.client {
+    t.Errorf("cam.client not set correctly")
   }
 
-  if cam.password != password {
-    t.Errorf("cam.password set to %s, expected %s", cam.password, password)
+  if actual.ipaddress != expected.ipaddress {
+    t.Errorf("cam.ipaddress set to %s, expected %s", actual.ipaddress, expected.ipaddress)
+  }
+
+  if actual.password != expected.password {
+    t.Errorf("cam.password set to %s, expected %s", actual.password, expected.password)
   }
 }
 
 func TestNewCamera(t *testing.T) {
+  exp := &Camera{http.DefaultClient, "1.2.3.4", "password"}
   cam := NewCamera("1.2.3.4", "password")
-  camcmp(t, cam, "1.2.3.4", "password")
+  camcmp(t, cam, exp)
 }
 
 func TestDefaultCamera(t *testing.T) {
+  exp := &Camera{http.DefaultClient, DefaultIP, "password"}
   cam := DefaultCamera("password")
-  camcmp(t, cam, DefaultIP, "password")
+  camcmp(t, cam, exp)
 }
 
-func capture(fn func(cam *Camera) error) (*http.Request, error) {
-  var req *http.Request
+type MockRequestHandler func(req *http.Request) (*http.Response, error)
 
-  handler := func(writer http.ResponseWriter, request *http.Request) {
-    req = request
-  }
+type MockTransport struct {
+  handler MockRequestHandler
+  request *http.Request
+}
 
-  srv := httptest.NewServer(http.HandlerFunc(handler))
-  defer srv.Close()
-
-  addr, _ := url.Parse(srv.URL)
-
-  cam := NewCamera(addr.Host, "testpass")
-  err := fn(cam)
-
-  return req, err
+func (t *MockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+  res, err := t.handler(req)
+  t.request = req
+  return res, err
 }
 
 func TestSend(t *testing.T) {
-  req, err := capture(func (cam *Camera) error {
-    return cam.Send("DL")
-  })
+  cam := DefaultCamera("testpass")
+
+  handler := func(req *http.Request) (*http.Response, error) {
+    return &http.Response{StatusCode: 200}, nil
+  }
+
+  transport := &MockTransport{handler: handler}
+  cam.client = &http.Client{Transport: transport}
+
+  err := cam.Send("DL")
+  req := transport.request
 
   if err != nil {
     t.Errorf("cam.Send returned an error")
@@ -56,6 +65,10 @@ func TestSend(t *testing.T) {
 
   if req.Method != "GET" {
     t.Errorf("cam.Send used method %s, expected %s", req.Method, "GET")
+  }
+
+  if req.URL.Host != cam.ipaddress {
+    t.Errorf("cam.SendParam requested host %s, expected %s", req.URL.Host, cam.ipaddress)
   }
 
   if req.URL.Path != "/camera/DL" {
@@ -74,9 +87,17 @@ func TestSendFail(t *testing.T) {
 }
 
 func TestSendParam(t *testing.T) {
-  req, err := capture(func (cam *Camera) error {
-    return cam.SendParam("SH", 1)
-  })
+  cam := DefaultCamera("testpass")
+
+  handler := func(req *http.Request) (*http.Response, error) {
+    return &http.Response{StatusCode: 200}, nil
+  }
+
+  transport := &MockTransport{handler: handler}
+  cam.client = &http.Client{Transport: transport}
+
+  err := cam.SendParam("SH", 1)
+  req := transport.request
 
   if err != nil {
     t.Errorf("cam.SendParam returned an error")
@@ -84,6 +105,10 @@ func TestSendParam(t *testing.T) {
 
   if req.Method != "GET" {
     t.Errorf("cam.SendParam used method %s, expected %s", req.Method, "GET")
+  }
+
+  if req.URL.Host != cam.ipaddress {
+    t.Errorf("cam.SendParam requested host %s, expected %s", req.URL.Host, cam.ipaddress)
   }
 
   if req.URL.Path != "/camera/SH" {
