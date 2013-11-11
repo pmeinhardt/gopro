@@ -6,6 +6,7 @@ import (
 )
 
 type Camera struct {
+  client *http.Client
   ipaddress string
   password string
 }
@@ -13,7 +14,7 @@ type Camera struct {
 const DefaultIP string = "10.5.5.9"
 
 func NewCamera(ipaddress, password string) *Camera {
-  return &Camera{ipaddress, password}
+  return &Camera{http.DefaultClient, ipaddress, password}
 }
 
 func DefaultCamera(password string) *Camera {
@@ -49,14 +50,18 @@ func (cam *Camera) url(action string, params *map[string]string) string {
   return u.String()
 }
 
+func (cam *Camera) get(url string) (*http.Response, error) {
+  return cam.client.Get(url)
+}
+
 func (cam *Camera) Send(action string) error {
-  _, err := http.Get(cam.url(action, nil))
+  _, err := cam.get(cam.url(action, nil))
   return err
 }
 
 func (cam *Camera) SendParam(action string, param int) error {
   params := map[string]string{"p": string(param)}
-  _, err := http.Get(cam.url(action, &params))
+  _, err := cam.get(cam.url(action, &params))
   return err
 }
 
