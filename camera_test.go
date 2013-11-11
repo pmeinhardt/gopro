@@ -1,9 +1,8 @@
 package gopro
 
 import (
-  // "errors"
+  "errors"
   "net/http"
-  // "net/url"
   "testing"
 )
 
@@ -68,7 +67,7 @@ func TestSend(t *testing.T) {
   }
 
   if req.URL.Host != cam.ipaddress {
-    t.Errorf("cam.SendParam requested host %s, expected %s", req.URL.Host, cam.ipaddress)
+    t.Errorf("cam.Send requested host %s, expected %s", req.URL.Host, cam.ipaddress)
   }
 
   if req.URL.Path != "/camera/DL" {
@@ -83,7 +82,20 @@ func TestSend(t *testing.T) {
 }
 
 func TestSendFail(t *testing.T) {
-  // TODO
+  cam := DefaultCamera("testpass")
+
+  handler := func(req *http.Request) (*http.Response, error) {
+    return nil, errors.New("this is bad")
+  }
+
+  transport := &MockTransport{handler: handler}
+  cam.client = &http.Client{Transport: transport}
+
+  res := cam.Send("DL")
+
+  if res == nil {
+    t.Errorf("cam.Send should return HTTP error")
+  }
 }
 
 func TestSendParam(t *testing.T) {
@@ -127,5 +139,18 @@ func TestSendParam(t *testing.T) {
 }
 
 func TestSendParamFail(t *testing.T) {
-  // TODO
+  cam := DefaultCamera("testpass")
+
+  handler := func(req *http.Request) (*http.Response, error) {
+    return nil, errors.New("this is bad")
+  }
+
+  transport := &MockTransport{handler: handler}
+  cam.client = &http.Client{Transport: transport}
+
+  res := cam.SendParam("SH", 1)
+
+  if res == nil {
+    t.Errorf("cam.SendParam should return HTTP error")
+  }
 }
