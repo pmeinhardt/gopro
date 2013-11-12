@@ -38,8 +38,8 @@ func TestListFiles(t *testing.T) {
 		"http://10.5.5.9:8080/DCIM/100GOPRO/GOPR0017.THM",
 	}
 
-	for i, expected := range names {
-		if actual := files[i].Name; actual != expected {
+	for i, actual := range files {
+		if expected := names[i]; actual.Name != expected {
 			t.Errorf("cam.ListFiles returned [%d] %v, expected %v", i, actual, expected)
 		}
 	}
