@@ -7,8 +7,12 @@ import (
 
 const DefaultIP string = "10.5.5.9"
 
+type client interface {
+	Get(string) (*http.Response, error)
+}
+
 type Camera struct {
-	client    *http.Client
+	client    client
 	ipaddress string
 	password  string
 }
